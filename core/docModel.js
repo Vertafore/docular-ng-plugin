@@ -87,8 +87,15 @@ module.exports = inherit({
     
     setData: function (data) {
         this.data = data;
+        if(data.parentDoc && data.parentDoc.module && !data.parentDoc.name) {
+            data.parentDoc.type = 'module';
+        }
         if(!data.id) {
-            data.id = data.name;
+            if(data.file.indexOf('.ngdoc') != -1) {
+                data.id = data.file.replace('.ngdoc', '');
+            } else {
+                data.id = data.name;
+            }
         }
         
     }

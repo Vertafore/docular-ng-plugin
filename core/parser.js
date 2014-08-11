@@ -136,6 +136,10 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             }
             var matches = docItem.match(/@([\w\d]+)\s*([\s\S]+)/);
             
+            if(!matches) {
+                return false;
+            }
+            
             docItemKey = matches[1];
             docItemContent = matches[2];
             docItemContent = docItemContent.replace(/[\n\r\s]+$/, '')
@@ -160,7 +164,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     parentDoc = docItemContent;
                 break;
                 case "name":
-                    if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'function' || docGroup.ngdoc == 'type') {
+                    if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'function' || docGroup.ngdoc == 'type' || docGroup.ngdoc === 'overview') {
                         if(docItemContent.indexOf('#') !== -1 || docItemContent.indexOf(':') !== -1) {
                             var split = docItemContent.split(/[#:]/);
                             parentDoc = split[0];
@@ -225,8 +229,6 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 if(doc.parentDoc && !doc.parentDoc.module) {
                     doc.parentDoc.module = doc.module;
                 }
-            } else {
-                console.log("Item already filled out: ", doc);
             }
         }
     },
