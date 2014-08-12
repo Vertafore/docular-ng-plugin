@@ -23,6 +23,7 @@
     "q": "*",
     "inherit": "*",
     "node.extend": "*",
-    "htmlparser2": "*"
+    "htmlparser2": "*",
+    "fs-extra": "*"
   }
 }

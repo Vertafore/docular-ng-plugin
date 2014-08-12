@@ -3,6 +3,8 @@ var Q = require('q');
 var util = require('util');
 var Parser = require('./core/parser');
 var DocModel = require('./core/docModel');
+var fse = require('fs-extra');
+var path = require('path');
 
 var Plugin = function () {
     
@@ -14,6 +16,8 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
         generator.on('FileParse', this.parseFile.bind(this));
         generator.on('CreateDocs', this.createDocs.bind(this));
         generator.on('FileParseBackfill', this.backfillData.bind(this));
+        generator.on('SetupConfig', this.setupConfig.bind(this));
+        generator.on('CopyFiles', this.copyFiles.bind(this));
     },
     
     createDocs: function (fileData, promises) {
@@ -28,6 +32,17 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
                 return Q(docModel);
             });
         }
+    },
+    
+    setupConfig: function (configuration) {
+        configuration.angularModules.push('docular.ng');
+        configuration.javascript.push('resources/plugins/ng/ngplugin.js');
+        configuration.css.push('resources/plugins/ng/ngplugin.css');
+    },
+    
+    copyFiles: function (webappDir) {
+        fse.ensureDirSync(webappDir + '/resources/plugins/ng');
+        fse.copySync(path.resolve(__dirname, './web'), webappDir + '/resources/plugins/ng');
     },
     
     backfillData: function (fileData, allFiles) {
