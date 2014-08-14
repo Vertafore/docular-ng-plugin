@@ -17,6 +17,7 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
         generator.on('CreateDocs', this.createDocs.bind(this));
         generator.on('FileParseBackfill', this.backfillData.bind(this));
         generator.on('SetupConfig', this.setupConfig.bind(this));
+        generator.on('GetStyles', this.getStyles.bind(this));
         generator.on('CopyFiles', this.copyFiles.bind(this));
     },
     
@@ -34,15 +35,19 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
         }
     },
     
+    getStyles: function (styles) {
+        styles.push(fse.readFileSync( path.resolve(__dirname, './web/ngplugin.less'), 'utf8' ));
+    },
+    
     setupConfig: function (configuration) {
-        configuration.angularModules.push('docular.ng');
-        configuration.javascript.push('resources/plugins/ng/ngplugin.js');
-        configuration.css.push('resources/plugins/ng/ngplugin.css');
+        configuration.angularModules.push('docular.plugin.ngdoc');
+        configuration.javascript.push('resources/plugins/ngdoc/ngplugin.js');
+        configuration.css.push('resources/plugins/ngdoc/ngplugin.css');
     },
     
     copyFiles: function (webappDir) {
-        fse.ensureDirSync(webappDir + '/resources/plugins/ng');
-        fse.copySync(path.resolve(__dirname, './web'), webappDir + '/resources/plugins/ng');
+        fse.ensureDirSync(webappDir + '/resources/plugins/ngdoc');
+        fse.copySync(path.resolve(__dirname, './web'), webappDir + '/resources/plugins/ngdoc');
     },
     
     backfillData: function (fileData, allFiles) {

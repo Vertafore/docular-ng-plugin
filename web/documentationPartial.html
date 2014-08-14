@@ -1,0 +1,35 @@
+<div ng-controller="docular.plugin.ngdoc.documentationController">
+    <h1>{{documentationItem.name}}</h1>
+    <small ng-if="documentationItem.memberOf"><strong>{{documentationItem.type}}</strong> in module {{documentationItem.memberOf}}</small>
+    
+    <div ng-bind-html="docDescription"></div>
+    
+    <div ng-if="documentationItem.type == 'directive'">
+        
+        <div ng-if="documentationItem.priority !== undefined || documentationItem.scope">
+            <h2>Directive Info</h2>
+            <p ng-if="documentationItem.priority !== undefined">This directive executes at priority level {{documentationItem.priority}}</p>
+            <p ng-if="documentationItem.scope">This directive creates a new scope</p>
+        </div>
+        
+        <h2>Usage</h2>
+        <div ng-if="documentationItem.restrict.indexOf('E') != -1">
+            as an element:
+            <div class="usageExample">
+                
+            </div>
+        </div>
+        <div ng-if="documentationItem.restrict.indexOf('A') != -1">
+            as an attribute
+            <div class="usageExample">
+                
+            </div>
+        </div>
+        <div ng-if="documentationItem.restrict.indexOf('C') != -1">
+            as a class:
+            <div class="usageExample">
+                
+            </div>
+        </div>
+    </div>
+</div>

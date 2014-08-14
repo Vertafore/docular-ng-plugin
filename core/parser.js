@@ -134,14 +134,14 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             if(isngdoc) {
                 docItem = docItem.replace('@description', '@description ');
             }
-            var matches = docItem.match(/@([\w\d]+)\s*([\s\S]+)/);
+            var matches = docItem.match(/@([\w\d]+)\s*([\s\S]+)?/);
             
             if(!matches) {
                 return false;
             }
             
             docItemKey = matches[1];
-            docItemContent = matches[2];
+            docItemContent = matches[2] || '';
             docItemContent = docItemContent.replace(/[\n\r\s]+$/, '')
             if(docItemKey === 'description' && isngdoc) {
                 docItemContent = docChunk.match(/@description([\s\S]+)/);
@@ -155,6 +155,10 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 case 'description':
                 case 'example':
                     docGroup[docItemKey] = this.parseMarkdown(docItemContent);
+                break;
+                case 'scope':
+                    console.log("Found scope")
+                    docGroup.scope = true;
                 break;
                 case 'methodOf':
                 case 'propertyOf':
