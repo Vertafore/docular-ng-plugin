@@ -75,12 +75,13 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         var paramData = {
             type: [],
             varName: null,
+            altName: null,
             description: null,
             optional: false,
             defaultValue: null
         };
         
-        var chunks = param.match(/({([^\}]+)})?\s*([\[\]\=\w]+)\s+([\s\S]+)/);
+        var chunks = param.match(/({([^\}]+)})?\s*([\[\]\=\w\|]+)\s+([\s\S]+)/);
         
         paramData.type = chunks[2] ? chunks[2].split('|').map(function (type) {
             if(type.indexOf('=') !== -1) { paramData.optional = true; }
@@ -92,7 +93,11 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         }) : 'undefined';
         
         paramData.varName = chunks[3].replace('[', '').replace(']', '');
-        
+        if(paramData.varName.indexOf('|') !== -1) {
+            var names = paramData.varName.split('|');
+            paramData.varName = names[0];
+            paramData.altName = names[1];
+        }
         var defaultValue = paramData.varName.match(/=(.*)/);
         if(defaultValue) {
             defaultValue = defaultValue[1];
