@@ -1,5 +1,5 @@
 angular.module('docular.plugin.ngdoc', [])
-    .controller('docular.plugin.ngdoc.documentationController', ['$scope', 'markdown', '$sce', '$filter', function ($scope, markdownService, $sce, $filter) {
+    .controller('docular.plugin.ngdoc.documentationController', ['$scope', 'ngmarkdown', '$sce', '$filter', function ($scope, markdownService, $sce, $filter) {
         console.log($scope);
         var doc = $scope.documentationItem;
         $scope.docDescription = $sce.trustAsHtml(markdownService($scope.documentationItem.description.join('\n')))
@@ -46,6 +46,8 @@ angular.module('docular.plugin.ngdoc', [])
             $scope.elUsage.push(elString)
             $scope.attrUsage.push(attrString)
             $scope.classUsage.push(classString)
+            
+            param.descriptionRendered = $sce.trustAsHtml(markdownService(param.description));
         }
         if(!addedDirective) {
             $scope.attrUsage.splice(1, 0, '\t' + dashFilter(doc.name));
@@ -70,6 +72,44 @@ angular.module('docular.plugin.ngdoc', [])
             templateUrl: 'resources/plugins/ngdoc/templates/usageLine.html'
         }
     })
+    .service('ngmarkdown', ['markdown', 'documentation', 'dataFilter', function (markdownService, docService, dataFilter) {
+        return function (content) {
+            var availableDocs = docService.getAllDocuments();
+            
+            content = content.replace(/{(@link ([^}]+)\s+([^}]+))}/g, function (matchStr, innerMatch, linkTo, linkName) {
+                console.log(arguments)
+                var href = linkTo;
+                
+                if(linkTo.indexOf('#') !== -1) {
+                    linkTo = linkTo.split('#')[0];
+                }
+                
+                if(linkTo.indexOf('://') === -1) {
+                    var result = dataFilter(availableDocs, {
+                        name: linkTo
+                    });
+                    if(!result.length) {
+                        result = dataFilter(availableDocs, {
+                            search: {op: 'like', val: linkTo}
+                        });
+                    }
+                    console.log(result, result.length)
+                    if(result.length) {
+                        href = '#/documentation/' + result[0].path + '/docApi/' + result[0].name;
+                    } else {
+                        href = '#/search/?query=' + linkTo;
+                    }
+                }
+                return "<a href='" + href + "'>" + linkName + '</a>';
+            });
+            
+            var rendered = markdownService(content);
+            
+            
+            
+            return rendered;
+        }
+    }])
     .filter('dashCase', function () {
         return function (string) {
             return string.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();

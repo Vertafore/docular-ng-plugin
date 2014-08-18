@@ -80,6 +80,7 @@ module.exports = inherit({
         delete data.example;
         data.type = this.type;
         data.handler = 'ngdoc';
+        data.search = [data.name, data.module + '.' + data.ngdoc + ':' + data.name].join(' ');
         return data;
     },
     

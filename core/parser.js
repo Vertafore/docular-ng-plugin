@@ -81,16 +81,22 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             defaultValue: null
         };
         
+        //I hate regexes. Seriously. 
         var chunks = param.match(/({([^\}]+)})?\s*([\[\]\=\w\|]+)\s+([\s\S]+)/);
         
-        paramData.type = chunks[2] ? chunks[2].split('|').map(function (type) {
-            if(type.indexOf('=') !== -1) { paramData.optional = true; }
-            type = type.replace(/=.*/, '');
-            return {
-                name: type,
-                type: (type.indexOf('function') !== -1 ? 'function' : type).toLowerCase()
-            };
-        }) : 'undefined';
+        var types = chunks[2] ? chunks[2].match(/([\w]+((\.[\w<\.\(\)]+\|?[\w\(\)>]+)|\([\w]+\))?)=?/g) : null;
+        if(!types) {
+            paramData.type = ['undefined'];
+        } else {
+            paramData.type = types.map(function (type) {
+                if(type.indexOf('=') !== -1) { paramData.optional = true; }
+                type = type.replace(/=.*/, '');
+                return {
+                    name: type,
+                    type: (type.indexOf('function') !== -1 ? 'function' : type).toLowerCase()
+                };
+            })
+        }
         
         paramData.varName = chunks[3].replace('[', '').replace(']', '');
         if(paramData.varName.indexOf('|') !== -1) {
