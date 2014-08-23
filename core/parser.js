@@ -4,6 +4,7 @@ var util = require('util');
 var htmlparser = require("htmlparser2");
 var DocModel = require('./docModel');
 
+var eid = 1;
 
 var Parser = function () {};
 
@@ -49,6 +50,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                         pieces.push(currentText);
                         currentText = null;
                     }
+                    currentExample.id = eid++;
                     pieces.push(currentExample);
                     currentExample = null;
                 } else if(name === 'file') {
@@ -131,7 +133,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             return false;
         }
         for(i = 0, l = docItems.length; i < l; i++) {
-            docItems[i] = docItems[i].replace(/[\t ]*\*[\t ]*/g, '');
+            docItems[i] = docItems[i].replace(/[\t ]+\*[\t ]*/g, '');
             if(docItems[i].indexOf('@ngdoc') !== -1) {
                 ngdocParamFound = true;
             }
@@ -163,13 +165,19 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 case 'param': 
                     docGroup.params.push(this.parseParam(docItemContent));
                 break;
-                case 'description':
-                case 'example':
-                    docGroup[docItemKey] = this.parseMarkdown(docItemContent);
-                break;
+//                case 'description':
+//                case 'example':
+//                    docGroup[docItemKey] = this.parseMarkdown(docItemContent);
+//                break;
                 case 'scope':
                     console.log("Found scope")
                     docGroup.scope = true;
+                break;
+                case 'requires':
+                    if(!docGroup.requires) {
+                        docGroup.requires = [];
+                    }
+                    docGroup.requires.push(docItemContent);
                 break;
                 case 'methodOf':
                 case 'propertyOf':

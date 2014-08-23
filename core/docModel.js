@@ -77,7 +77,6 @@ module.exports = inherit({
     
     toJSON: function () {
         var data = nodeExtend({}, this.data);
-        delete data.example;
         data.type = this.type;
         data.handler = 'ngdoc';
         data.search = [data.name, data.module + '.' + data.ngdoc + ':' + data.name].join(' ');

@@ -1,8 +1,15 @@
-<div ng-controller="docular.plugin.ngdoc.documentationController">
+<div class='ngdoc-page' ng-controller="docular.plugin.ngdoc.documentationController">
     <h1 ng-if="documentationItem.type != 'overview'">{{documentationItem.name}}</h1>
     <small ng-if="documentationItem.memberOf"><strong>{{documentationItem.type}}</strong> in module {{documentationItem.memberOf}}</small>
     
-    <div ng-bind-html="docDescription"></div>
+    <ng-example-container group='group' example="docDescription"></ng-example-container>
+    
+    <div ng-if='dependencies.length'>
+        <h2>Dependencies</h2>
+        <ul>
+            <li ng-repeat='dep in dependencies'><a ng-href='{{dep.href}}'>{{dep.name}}</a></li>
+        </ul>
+    </div>
     
     <div ng-if="documentationItem.type == 'directive'">
         
@@ -16,35 +23,47 @@
         <h2>Usage</h2>
         <div ng-if="documentationItem.restrict.indexOf('E') != -1">
             as an element:
-            <div class="usageExample"><pre>{{elUsage}}</pre></div>
+            <div class="usageExample"><source-viewer source="elUsage" file-type="xml">{{elUsage}}</source-viewer></div>
         </div>
         <div ng-if="documentationItem.restrict.indexOf('A') != -1">
             as an attribute
-            <div class="usageExample"><pre>{{attrUsage}}</pre></div>
+            <div class="usageExample"><source-viewer source="attrUsage" file-type="xml">{{attrUsage}}</source-viewer></div>
         </div>
         <div ng-if="documentationItem.restrict.indexOf('C') != -1">
             as a class:
-            <div class="usageExample"><pre>{{classUsage}}</pre></div>
+            <div class="usageExample"><source-viewer source="classUsage" file-type="xml">{{classUsage}}</source-viewer></div>
         </div>
     </div>
     <div ng-if="documentationItem.params.length &gt; 0" id="argumentSection">
         <h2>Arguments</h2>
-        <table>
-            <thead>
-                <tr><th>Param</th><th>Type</th><th>Details</th></tr>
-            </thead>
-            <tbody>
-                <tr ng-repeat="param in documentationItem.params">
-                    <td class="paramName">
-                        <div>{{param.varName}}<span ng-if="param.altName"> | {{param.altName}}</span></div>
-                        <em ng-if="param.optional">Optional</em>
-                    </td>
-                    <td>
-                        <div ng-repeat="type in param.type"><span class="paramType" ng-class="type.type">{{type.name}}</span></div>
-                    </td>
-                    <td ng-bind-html="param.descriptionRendered"></td>
-                </tr>
-            </tbody>
-        </table>
+        <param-list params="documentationItem.params"></param-list>
+    </div>
+    <div ng-if='methods.length'>
+        <h2>Methods</h2>
+        <div ng-repeat='method in methods' ng-init='documentationItem = method'>
+            <h4>{{documentationItem.name}}</h4>
+            <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
+        </div>
+    </div>
+    
+    <div ng-if='properties.length'>
+        <h2>Properties</h2>
+        <div ng-repeat='property in properties' ng-init='documentationItem = property'>
+            <h4>{{documentationItem.name}}</h4>
+            <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
+        </div>
+    </div>
+    
+    <div ng-if='events.length'>
+        <h2>Events</h2>
+        <div ng-repeat='event in events' ng-init='documentationItem = event'>
+            <h4>{{documentationItem.name}}</h4>
+            <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
+        </div>
+    </div>
+    
+    <div id="exampleArea" ng-if="example">
+        <h2>Examples</h2>
+        <ng-example-container group='group' example="example"></ng-example-container>
     </div>
 </div>
