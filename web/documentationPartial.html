@@ -41,7 +41,8 @@
     <div ng-if='methods.length'>
         <h2>Methods</h2>
         <div ng-repeat='method in methods' ng-init='documentationItem = method'>
-            <h4>{{documentationItem.name}}</h4>
+            <h4><ng-method-usage-example item='documentationItem'></ng-method-usage-example></h4>
+            <ng-example-container group='group' example="documentationItem.description"></ng-example-container>
             <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
         </div>
     </div>
@@ -49,7 +50,9 @@
     <div ng-if='properties.length'>
         <h2>Properties</h2>
         <div ng-repeat='property in properties' ng-init='documentationItem = property'>
-            <h4>{{documentationItem.name}}</h4>
+            <h4><code ng-bind-template="{{documentationItem.name}}"></code></h4>
+            <div ng-repeat="type in documentationItem.type track by $index"><span class="paramType" ng-class="type.type">{{type.name}}</span></div>
+            <ng-example-container group='group' example="documentationItem.description"></ng-example-container>
             <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
         </div>
     </div>

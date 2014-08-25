@@ -165,6 +165,12 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 case 'param': 
                     docGroup.params.push(this.parseParam(docItemContent));
                 break;
+                case 'property': 
+                    if(!docGroup.property) {
+                        docGroup.property = [];
+                    }
+                    docGroup.property.push(this.parseParam(docItemContent))
+                break;
 //                case 'description':
 //                case 'example':
 //                    docGroup[docItemKey] = this.parseMarkdown(docItemContent);

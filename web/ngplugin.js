@@ -62,9 +62,18 @@ angular.module('docular.plugin.ngdoc', [])
             right: {op: 'lt', val: doc.right},
             left: {op: 'gt', val: doc.left}
         });
+        if(doc.property) {
+            $scope.properties = $scope.properties.concat(doc.property.map(function (prop) {
+                return {
+                    name: prop.varName,
+                    description: prop.description,
+                    type: prop.type
+                }
+            }))
+        }
         
         
-        console.log($scope.methods);
+        console.log($scope.properties);
         
         $scope.elUsage.push('<' + dashFilter(doc.name));
         $scope.attrUsage.push('<' + (doc.element || 'ANY'));
@@ -308,6 +317,37 @@ angular.module('docular.plugin.ngdoc', [])
                 }
                 
                 return exampleConfig;
+            }
+        }
+    }])
+    .directive('ngMethodUsageExample', [function () {
+        return {
+            restrict: 'E',
+            scope: {
+                'item': '='
+            },
+            template: '<code ng-bind-template="{{example}}"></code>',
+            link: {
+                pre: function ($scope, $element) {
+                    var doc = $scope.item;
+                    var example = [doc.name + '('];
+                    for(var i = 0, l = doc.params.length; i < l; i++) {
+                        var param = doc.params[i], paramText = '';
+                        if(param.optional) {
+                            paramText+='[';
+                        }
+                        paramText+=param.varName;
+                        if(param.optional) {
+                            paramText+=']';
+                        }
+                        if(i != l - 1) {
+                            paramText += ', '
+                        }
+                        example.push(paramText)
+                    }
+                    example.push(')');
+                    $scope.example = example.join('');
+                }
             }
         }
     }])
