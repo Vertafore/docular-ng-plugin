@@ -61,6 +61,7 @@
         <h2>Events</h2>
         <div ng-repeat='event in events' ng-init='documentationItem = event'>
             <h4>{{documentationItem.name}}</h4>
+            <ng-example-container group='group' example="documentationItem.description"></ng-example-container>
             <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
         </div>
     </div>
