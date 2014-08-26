@@ -4,7 +4,7 @@ angular.module('docular.plugin.ngdoc', [])
         var availableDocs = docService.getAllDocuments();
         $scope.docDescription = [];
         
-        $scope.docDescription = doc.description.replace(/(<example)/g, "<ng-example").replace(/(<\/example>)/g, "</ng-example>");
+        $scope.docDescription = doc.description ? doc.description.replace(/(<example)/g, "<ng-example").replace(/(<\/example>)/g, "</ng-example>") : '';
         $scope.directiveNameIsParam = false;
         
         var dashFilter = $filter('dashCase');
@@ -62,6 +62,7 @@ angular.module('docular.plugin.ngdoc', [])
             right: {op: 'lt', val: doc.right},
             left: {op: 'gt', val: doc.left}
         });
+        
         if(doc.property) {
             $scope.properties = $scope.properties.concat(doc.property.map(function (prop) {
                 return {
@@ -80,50 +81,52 @@ angular.module('docular.plugin.ngdoc', [])
         $scope.classUsage.push('<' + (doc.element || 'ANY') + ' class="');
         
         var addedDirective = false;
-        for(var i = 0, l = doc.params.length; i < l; i++) {
-            var param = doc.params[i];
-            if(param.varName === doc.name) {
-                addedDirective = true;
+        if(doc.params) {
+            for(var i = 0, l = doc.params.length; i < l; i++) {
+                var param = doc.params[i];
+                if(param.varName === doc.name) {
+                    addedDirective = true;
+                }
+
+                var attrString = dashFilter(param.varName)+'='+'""';
+                var elString = dashFilter(param.altName || param.varName)+'='+'""';
+                if(param.optional) {
+                    attrString = '[' + attrString + ']';
+                    elString =  '[' + elString + ']';
+                }
+                var classString = dashFilter(param.varName)+': ;';
+                if(param.optional) {
+                    classString = '[' + classString + ']';
+                }
+                if(i === l - 1 ) {
+                    attrString = attrString + '>';
+                    elString = elString + '>';
+                }
+                attrString = '    ' + attrString;
+                elString = '    ' + elString;
+                $scope.elUsage.push(elString);
+                $scope.attrUsage.push(attrString);
+                $scope.classUsage.push(classString);
+
+                param.descriptionRendered = $sce.trustAsHtml(markdownService(param.description));
             }
-            
-            var attrString = dashFilter(param.varName)+'='+'""';
-            var elString = dashFilter(param.altName || param.varName)+'='+'""';
-            if(param.optional) {
-                attrString = '[' + attrString + ']';
-                elString =  '[' + elString + ']';
+            if(!addedDirective) {
+                $scope.attrUsage.splice(1, 0, '    ' + dashFilter(doc.name));
+                $scope.classUsage.splice(1, 0, dashFilter(doc.name) + ';');
             }
-            var classString = dashFilter(param.varName)+': ;';
-            if(param.optional) {
-                classString = '[' + classString + ']';
+            if(doc.params.length === 0) {
+                $scope.elUsage[$scope.elUsage.length - 1] += (doc.params.length === 0 ? '>' : '');
+                $scope.attrUsage[$scope.attrUsage.length - 1] += (doc.params.length === 0 ? '>' : '');
             }
-            if(i === l - 1 ) {
-                attrString = attrString + '>';
-                elString = elString + '>';
-            }
-            attrString = '    ' + attrString;
-            elString = '    ' + elString;
-            $scope.elUsage.push(elString);
-            $scope.attrUsage.push(attrString);
-            $scope.classUsage.push(classString);
-            
-            param.descriptionRendered = $sce.trustAsHtml(markdownService(param.description));
+
+            $scope.elUsage.push('...\n</' + dashFilter(doc.name) + '>');
+            $scope.attrUsage.push('...\n</' + (doc.element || 'ANY') + '>');
+            $scope.classUsage.push('"> ... </' + (doc.element || 'ANY') + '>');
+
+            $scope.elUsage = $scope.elUsage.join('\n');
+            $scope.attrUsage = $scope.attrUsage.join('\n');
+            $scope.classUsage = $scope.classUsage.join('');
         }
-        if(!addedDirective) {
-            $scope.attrUsage.splice(1, 0, '    ' + dashFilter(doc.name));
-            $scope.classUsage.splice(1, 0, dashFilter(doc.name) + ';');
-        }
-        if(doc.params.length === 0) {
-            $scope.elUsage[$scope.elUsage.length - 1] += (doc.params.length === 0 ? '>' : '');
-            $scope.attrUsage[$scope.attrUsage.length - 1] += (doc.params.length === 0 ? '>' : '');
-        }
-        
-        $scope.elUsage.push('...\n</' + dashFilter(doc.name) + '>');
-        $scope.attrUsage.push('...\n</' + (doc.element || 'ANY') + '>');
-        $scope.classUsage.push('"> ... </' + (doc.element || 'ANY') + '>');
-        
-        $scope.elUsage = $scope.elUsage.join('\n');
-        $scope.attrUsage = $scope.attrUsage.join('\n');
-        $scope.classUsage = $scope.classUsage.join('');
         $scope.example = doc.example ? doc.example.replace(/(<example)/g, "<ng-example").replace(/(<\/example>)/g, "</ng-example>") : false;
     }])
     .directive('paramList', ['ngmarkdown', '$sce', function (markdownService, $sce) {

@@ -193,7 +193,8 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     parentDoc = docItemContent;
                 break;
                 case "name":
-                    if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'function' || docGroup.ngdoc == 'type' || docGroup.ngdoc === 'overview') {
+                    if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'constant' || docGroup.ngdoc === 'provider' || docGroup.ngdoc === 'service' || docGroup.ngdoc === 'directive' || docGroup.ngdoc === 'function' || docGroup.ngdoc == 'type' || docGroup.ngdoc === 'overview') {
+                        console.log(docItemContent)
                         if(docItemContent.indexOf('#') !== -1 || docItemContent.indexOf(':') !== -1) {
                             var split = docItemContent.split(/[#:]/);
                             parentDoc = split[0];
@@ -211,7 +212,17 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             }
         }
         
+        var replaceables = ['method', 'property', 'event', 'constant', 'provider', 'service', 'function', 'type', 'directive'];
+        
         if(docGroup.ngdoc != 'module') {
+            if(parentDoc) {
+                console.log("ParentDoc: ", parentDoc)
+                for(var i = 0, l = replaceables.length; i < l; i++) {
+                    var re = new RegExp('\.(' + replaceables[i] + '([:#][A-Za-z\d]+)?)', 'g');
+                    parentDoc = parentDoc.replace(re, '');
+                }
+                console.log("ParentDoc: ", parentDoc)
+            }
             docGroup.parentDoc = {
                 module: docGroup.module,
                 name: parentDoc

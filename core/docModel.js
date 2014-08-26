@@ -40,6 +40,16 @@ module.exports = inherit({
                 return this.data.name;
             }
         });
+        Object.defineProperty(this, "path", {
+            get: function () {
+                return this.data.path;
+            }
+        });
+        Object.defineProperty(this, "handler", {
+            get: function () {
+                return 'ngdoc';
+            }
+        });
     },
     
     getDocType: function () {
