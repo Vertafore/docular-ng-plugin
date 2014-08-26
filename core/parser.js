@@ -176,7 +176,6 @@ Parser.prototype = nodeExtend(Parser.prototype, {
 //                    docGroup[docItemKey] = this.parseMarkdown(docItemContent);
 //                break;
                 case 'scope':
-                    console.log("Found scope")
                     docGroup.scope = true;
                 break;
                 case 'requires':
@@ -193,8 +192,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     parentDoc = docItemContent;
                 break;
                 case "name":
-                    if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'constant' || docGroup.ngdoc === 'provider' || docGroup.ngdoc === 'service' || docGroup.ngdoc === 'directive' || docGroup.ngdoc === 'function' || docGroup.ngdoc == 'type' || docGroup.ngdoc === 'overview') {
-                        console.log(docItemContent)
+                    if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'constant' || docGroup.ngdoc === 'provider' || docGroup.ngdoc === 'service' || docGroup.ngdoc === 'directive' || docGroup.ngdoc === 'function' || docGroup.ngdoc === 'type' || docGroup.ngdoc === 'overview') {
                         if(docItemContent.indexOf('#') !== -1 || docItemContent.indexOf(':') !== -1) {
                             var split = docItemContent.split(/[#:]/);
                             parentDoc = split[0];
@@ -214,14 +212,12 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         
         var replaceables = ['method', 'property', 'event', 'constant', 'provider', 'service', 'function', 'type', 'directive'];
         
-        if(docGroup.ngdoc != 'module') {
+        if(docGroup.ngdoc != 'module' && docGroup.ngdoc != 'overview') {
             if(parentDoc) {
-                console.log("ParentDoc: ", parentDoc)
                 for(var i = 0, l = replaceables.length; i < l; i++) {
                     var re = new RegExp('\.(' + replaceables[i] + '([:#][A-Za-z\d]+)?)', 'g');
                     parentDoc = parentDoc.replace(re, '');
                 }
-                console.log("ParentDoc: ", parentDoc)
             }
             docGroup.parentDoc = {
                 module: docGroup.module,
@@ -230,6 +226,8 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             if(parentDoc) {
                 docGroup.parentDoc.name = parentDoc;
             }
+        } else if (docGroup.ngdoc === 'overview') {
+            docGroup.parentDoc = {};
         }
         
         return docGroup;
@@ -263,11 +261,15 @@ Parser.prototype = nodeExtend(Parser.prototype, {
     backfill: function (fileData, allFiles) {
         for(var i = 0, l = fileData.docs.length; i < l; i++) {
             var doc = fileData.docs[i];
-            
-            if(doc.ngdoc !== undefined && !doc.module) {
+            if(doc.ngdoc !== undefined && !doc.module && doc.ngdoc !== 'overview') {
                 doc.module = this.guessModuleFromFiles(doc, allFiles);
                 if(doc.parentDoc && !doc.parentDoc.module) {
                     doc.parentDoc.module = doc.module;
+                }
+            } else if (doc.ngdoc === 'overview') {
+                var name = this.guessModuleFromFiles(doc, allFiles);
+                if(doc.parentDoc && !doc.parentDoc.name) {
+                    doc.parentDoc.name = name;
                 }
             }
         }
@@ -289,7 +291,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             if(fileName.match(regex)){
                 var docs = allFiles[fileName].docs;
                 for(var i = 0, l = docs.length; i < l; i++) {
-                    if(docs[i].ngdoc === 'module') {
+                    if(docs[i].ngdoc === 'module' || (docs[i].ngdoc === 'overview' && docs[i].file.indexOf('index.ngdoc') !== -1)) {
                         return docs[i].name;
                     }
                 }

@@ -69,8 +69,8 @@ angular.module('docular.plugin.ngdoc', [])
                     name: prop.varName,
                     description: prop.description,
                     type: prop.type
-                }
-            }))
+                };
+            }));
         }
         
         
