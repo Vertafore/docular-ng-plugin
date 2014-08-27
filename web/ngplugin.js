@@ -254,7 +254,6 @@ angular.module('docular.plugin.ngdoc', [])
                     });
                     $scope.examples.push(ex);
                 })
-                
                 var compiled = $compile(template)($scope.$new());
                 compiled.each(function () {
                     if($(this).is('.NGFILE')) {

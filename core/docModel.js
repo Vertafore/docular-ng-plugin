@@ -6,7 +6,7 @@ module.exports = inherit({
         Object.defineProperty(this, "id", {
             get: function() {
                 var data = this.data;
-                if(this.type === 'overview') {
+                if(this.type === 'overview' || this.type === 'tutorial') {
                     return this.name;
                 }
                 return this.data.groupId + '_' + this.data.module + '_' + JSON.stringify(data.parentDoc) + '_' + data.ngdoc + '_' + data.id;
@@ -93,8 +93,8 @@ module.exports = inherit({
         data.type = this.type;
         data.handler = 'ngdoc';
         data.search = [data.name, data.module + '.' + data.ngdoc + ':' + data.name].join(' ');
-        
-        if(data.type === 'overview') {
+        data.sortOn = data.step || data.name;
+        if(data.type === 'overview' || data.type === 'tutorial') {
             data.module = data.name;
         }
         return data;
@@ -106,13 +106,13 @@ module.exports = inherit({
     
     setData: function (data) {
         this.data = data;
-        if(this.type != 'overview') {
+        if(this.type != 'overview' && this.type != 'tutorial') {
             if(data.parentDoc && data.parentDoc.module && !data.parentDoc.name) {
                 data.parentDoc.type = 'module';
             }
         } else {
             if(data.parentDoc && !data.parentDoc.name) {
-                data.parentDoc.type = 'overview';
+                data.parentDoc.type = this.type;
             }
         }
         if(!data.id) {

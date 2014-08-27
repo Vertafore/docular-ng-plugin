@@ -226,7 +226,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             if(parentDoc) {
                 docGroup.parentDoc.name = parentDoc;
             }
-        } else if (docGroup.ngdoc === 'overview') {
+        } else if (docGroup.ngdoc === 'overview' || docGroup.ngdoc === 'tutorial') {
             docGroup.parentDoc = {};
         }
         
@@ -266,7 +266,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 if(doc.parentDoc && !doc.parentDoc.module) {
                     doc.parentDoc.module = doc.module;
                 }
-            } else if (doc.ngdoc === 'overview') {
+            } else if (doc.ngdoc === 'overview' || doc.ngdoc === 'tutorial') {
                 var name = this.guessModuleFromFiles(doc, allFiles);
                 if(doc.parentDoc && !doc.parentDoc.name) {
                     doc.parentDoc.name = name;
@@ -291,7 +291,11 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             if(fileName.match(regex)){
                 var docs = allFiles[fileName].docs;
                 for(var i = 0, l = docs.length; i < l; i++) {
-                    if(docs[i].ngdoc === 'module' || (docs[i].ngdoc === 'overview' && docs[i].file.indexOf('index.ngdoc') !== -1)) {
+                    if(docs[i].ngdoc === 'module') {
+                        return docs[i].name;
+                    } else if (docs[i].ngdoc === 'overview' && docs[i].file.indexOf('index.ngdoc') !== -1) {
+                        return docs[i].name;
+                    } else if (docs[i].ngdoc === 'tutorial' && docs[i].step === '-1') {
                         return docs[i].name;
                     }
                 }
