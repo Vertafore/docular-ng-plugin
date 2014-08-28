@@ -24,6 +24,9 @@
     "inherit": "*",
     "node.extend": "*",
     "htmlparser2": "*",
-    "fs-extra": "*"
+    "fs-extra": "*",
+    "grunt": "*",
+    "tar": "*",
+    "request": "*"
   }
 }
