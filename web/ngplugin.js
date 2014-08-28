@@ -196,7 +196,7 @@ angular.module('docular.plugin.ngdoc', [])
             restrict: 'E',
             link: function ($scope, $element) {
                 var template = $scope.example, example, files = [], i = 0;
-                
+                if(!template) { return; }
                 example = template.match(/(<ng-example[^>]*>[\s\S]+?(?=<\/ng-example>)<\/ng-example>)/g);
                 
                 var tempTemplate = markdownService(template.replace(/(<ng-example[^>]*>[\s\S]+?(?=<\/ng-example>)<\/ng-example>)/g, function () {
