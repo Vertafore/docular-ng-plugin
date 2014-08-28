@@ -92,7 +92,7 @@ module.exports = inherit({
         var data = nodeExtend({}, this.data);
         data.type = this.type;
         data.handler = 'ngdoc';
-        data.search = [data.name, data.module + '.' + data.ngdoc + ':' + data.name].join(' ');
+        data.search = [data.name, data.module + '.' + data.ngdoc + ':' + data.name, data.file].join(' ');
         data.sortOn = data.step || data.name;
         if(data.type === 'overview' || data.type === 'tutorial') {
             data.module = data.name;

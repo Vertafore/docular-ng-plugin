@@ -151,13 +151,13 @@ angular.module('docular.plugin.ngdoc', [])
             var availableDocs = docService.getAllDocuments();
             var rendered;
             content = content.replace("<example", "<ng-example").replace("</example>", "</ng-example");
-            content = content.replace(/{(@link ([^}]+)\s+([^}]+))}/g, function (matchStr, innerMatch, linkTo, linkName) {
+            content = content.replace(/{(@link ([^}\s]+)\s+([^}]+))}/g, function (matchStr, innerMatch, linkTo, linkName) {
                 var href = linkTo;
                 
                 if(linkTo.indexOf('#') !== -1) {
                     linkTo = linkTo.split('#')[0];
                 }
-
+                
                 if(linkTo.indexOf('://') === -1) {
                     var result = dataFilter(availableDocs, {
                         name: linkTo
@@ -234,7 +234,7 @@ angular.module('docular.plugin.ngdoc', [])
                         var split = name.split('.');
 
                         var indent = null;
-                        var content = child.html();
+                        var content = child.html().replace(/&lt;/g, '<').replace(/&gt;/g, '>');
                         var contentLines = content.replace(/\t/g, '    ').split(/[\n\r]/);
                         for(var i = 0, l = contentLines.length; i < l; i++) {
                             var line = contentLines[i];
@@ -415,7 +415,7 @@ angular.module('docular.plugin.ngdoc', [])
 
                                 iframeDoc[0].head.appendChild(tag);
                                 try {
-                                    tag.innerHTML = file.content;
+                                    tag.innerText = tag.textContent = file.content;
                                 } catch (e) { /* not my problem */ console.log(e); }
                             }
                         }
@@ -431,14 +431,14 @@ angular.module('docular.plugin.ngdoc', [])
                                     content.find('script').each(function () {
                                         var tag = iframeDoc[0].createElement('script');
                                         iframeDoc[0].body.appendChild(tag);
-                                        tag.innerHTML = $(this).text();
+                                        tag.innerText = tag.textContent = $(this).text();
                                     });
                                     
                                     found = true;
                                 } else {
                                     var script = iframeDoc[0].createElement('script');
                                     iframeDoc[0].body.appendChild(script);
-                                    script.innerHTML = 'addFileToCache(' + JSON.stringify(file) + ');';
+                                    script.innerText = script.textContent = 'addFileToCache(' + JSON.stringify(file) + ');';
                                 }
                             }
                         }
@@ -447,9 +447,9 @@ angular.module('docular.plugin.ngdoc', [])
                             var script = iframeDoc[0].createElement('script');
                             iframeDoc[0].body.appendChild(script);
                             if($scope.module) {
-                                script.innerHTML = 'angular.bootstrap(document, ["' + $scope.module + '"]);';
+                                script.innerText = script.textContent = 'angular.bootstrap(document, ["' + $scope.module + '"]);';
                             } else {
-                                script.innerHTML = 'angular.bootstrap(document);';
+                                script.innerText = script.textContent = 'angular.bootstrap(document);';
                             }
                         }
                         var resizingInterval = $interval(function () {
