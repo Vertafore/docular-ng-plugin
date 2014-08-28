@@ -1,7 +1,7 @@
 <div>
     <tabset>
         <tab ng-repeat="file in files" heading="{{file.name}}" >
-            <source-viewer source="file.content" file-type="file.type"></source-viewer>
+            <source-viewer source="file.content" file-type="{{file.type}}"></source-viewer>
         </tab>
     </tabset>
     
