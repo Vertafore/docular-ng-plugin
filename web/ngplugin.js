@@ -28,9 +28,9 @@ angular.module('docular.plugin.ngdoc', [])
                     });
                 }
                 if(result.length) {
-                    href = '#/documentation/' + result[0].path + '/docApi/' + result[0].name;
+                    href = '#!/documentation/' + result[0].path + '/docApi/' + result[0].name;
                 } else {
-                    href = '#/search/?query=' + doc.requires[i];
+                    href = '#!/search/?query=' + doc.requires[i];
                 }
                 $scope.dependencies.push({
                     name: doc.requires[i],
@@ -168,9 +168,9 @@ angular.module('docular.plugin.ngdoc', [])
                         });
                     }
                     if(result.length) {
-                        href = '#/documentation/' + result[0].path + '/docApi/' + result[0].name;
+                        href = '#!/documentation/' + result[0].path + '/docApi/' + result[0].name;
                     } else {
-                        href = '#/search/?query=' + linkTo;
+                        href = '#!/search/?query=' + linkTo;
                     }
                 }
                 return "<a href='" + href + "'>" + linkName + '</a>';
