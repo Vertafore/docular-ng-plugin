@@ -278,7 +278,6 @@ angular.module('docular.plugin.ngdoc', [])
             link: {
                 pre: function ($scope, $element, $attrs) {
                     var example = $scope.example;
-                    console.log(example)
                     $scope.files = example.files;
                     $scope.group = example.group;
                     $scope.module = example.module;
