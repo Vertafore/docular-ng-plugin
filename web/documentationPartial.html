@@ -44,6 +44,8 @@
             <h4><ng-method-usage-example item='documentationItem'></ng-method-usage-example></h4>
             <ng-example-container group='group' example="documentationItem.description"></ng-example-container>
             <param-list ng-if="documentationItem.params.length > 0" params="documentationItem.params"></param-list>
+            <h5 ng-if="documentationItem.returns">Returns</h5>
+            <ng-example-container group='group' example="documentationItem.returns"></ng-example-container>
         </div>
     </div>
     

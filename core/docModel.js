@@ -106,6 +106,11 @@ module.exports = inherit({
     
     setData: function (data) {
         this.data = data;
+        
+        if(data.ngdoc === 'property' && (data.params.length > 0 || data.returns)) {
+            data.ngdoc = 'method';
+        }
+        
         if(this.type != 'overview' && this.type != 'tutorial') {
             if(data.parentDoc && data.parentDoc.module && !data.parentDoc.name) {
                 data.parentDoc.type = 'module';
