@@ -9,70 +9,7 @@ var eid = 1;
 var Parser = function () {};
 
 Parser.prototype = nodeExtend(Parser.prototype, {
-    
-    parseMarkdown: function (example) {
-        var pieces = [], currentExample, currentFile, currentText = null;
-        var parser = new htmlparser.Parser({
-            onopentag: function (name, attrs) {
-                if(name === 'example' || name === 'doc:example') {
-                    currentExample = {
-                        module: attrs.module,
-                        deps: attrs.deps,
-                        files: []
-                    };
-                } else if(name === 'file') {
-                    currentFile = {
-                        name: attrs.name,
-                        content: '',
-                        src: attrs.src
-                    };
-                } else {
-                    var attrKV = [];
-                    for(var attrKey in attrs) {
-                        attrKV.push('' + attrKey + '="' + attrs[attrKey] + '"');
-                    }
-                    var attrString = attrKV.join(" ");
-                    currentText += "<" + name + (attrString ? " " + attrString : '') + ">";
-                }
-            },
-            
-            ontext: function (text) {
-                if(currentText === null) {
-                    currentText = text;
-                } else {
-                    currentText += text;
-                }
-            },
-            
-            onclosetag: function (name) {
-                if(name === 'example' || name === 'doc:example') {
-                    if(currentText) {
-                        pieces.push(currentText);
-                        currentText = null;
-                    }
-                    currentExample.id = eid++;
-                    pieces.push(currentExample);
-                    currentExample = null;
-                } else if(name === 'file') {
-                    currentFile.content = currentText;
-                    currentText = null;
-                    if(!currentExample) {
-                        currentExample = {files: []};
-                    }
-                    currentExample.files.push(currentFile);
-                } else {
-                    currentText += "</" + name + ">";
-                }
-            }
-        });
-        parser.write(example);
-        parser.end();
-        if(currentText !== null) {
-            pieces.push(currentText);
-        }
-        return pieces;
-    },
-    
+
     parseParam: function (param) {
         var paramData = {
             type: [],
@@ -171,10 +108,6 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     }
                     docGroup.property.push(this.parseParam(docItemContent))
                 break;
-//                case 'description':
-//                case 'example':
-//                    docGroup[docItemKey] = this.parseMarkdown(docItemContent);
-//                break;
                 case 'scope':
                     docGroup.scope = true;
                 break;
@@ -211,11 +144,22 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         }
         
         var replaceables = ['method', 'property', 'event', 'constant', 'provider', 'service', 'function', 'type', 'directive'];
-        
+
+        if(docGroup.name) {
+            for(var i = 0, l = replaceables.length; i < l; i++) {
+                var re = new RegExp('\.(' + replaceables[i] + ')[:#][A-Za-z\d]+', 'g');
+                docGroup.name = docGroup.name.replace(re, '');
+                re = new RegExp('\.(' + replaceables[i] + ')$', 'g');
+                docGroup.name = docGroup.name.replace(re, '');
+            }
+        }
+
         if(docGroup.ngdoc != 'module' && docGroup.ngdoc != 'overview') {
             if(parentDoc) {
                 for(var i = 0, l = replaceables.length; i < l; i++) {
-                    var re = new RegExp('\.(' + replaceables[i] + '([:#][A-Za-z\d]+)?)', 'g');
+                    var re = new RegExp('\.(' + replaceables[i] + ')[:#][A-Za-z\d]+', 'g');
+                    parentDoc = parentDoc.replace(re, '');
+                    re = new RegExp('\.(' + replaceables[i] + ')$', 'g');
                     parentDoc = parentDoc.replace(re, '');
                 }
             }
