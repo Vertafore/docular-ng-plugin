@@ -66,7 +66,7 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
                         configuration.groups.push({
                             groupTitle: 'Angular Docs',
                             groupId: 'angular',
-                            groupIcon: 'icon-book',
+                            groupIcon: 'book',
                             examples: {
                                 autoBootstrap: true,
                                 include: {
@@ -123,14 +123,19 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
     
     backfillData: function (fileData, allFiles) {
         var parser = new Parser();
-        parser.backfill(fileData, allFiles);
+        if(fileData.extension === 'ngdoc' || fileData.extension === 'js') {
+            parser.backfill(fileData, allFiles);
+        }
     },
     
     parseFile: function (fileData, allFiles, promises) {
         var deferred = Q.defer(), parser = new Parser();
         promises.push(deferred.promise);
         
-        var results = parser.parse(fileData, allFiles);
+        var results = false;
+        if(fileData.extension === 'ngdoc' || fileData.extension === 'js') {
+            results = parser.parse(fileData, allFiles);
+        }
         if(!results) {
             deferred.resolve();
             return;
