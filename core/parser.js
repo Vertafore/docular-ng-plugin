@@ -108,8 +108,9 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     }
                     docGroup.property.push(this.parseParam(docItemContent))
                 break;
+                case 'deprecated':
                 case 'scope':
-                    docGroup.scope = true;
+                    docGroup[docItemKey] = true;
                 break;
                 case 'requires':
                     if(!docGroup.requires) {
@@ -173,7 +174,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         } else if (docGroup.ngdoc === 'overview' || docGroup.ngdoc === 'tutorial') {
             docGroup.parentDoc = {};
         }
-        
+
         return docGroup;
     },
     
