@@ -3,19 +3,19 @@ angular.module('docular.plugin.ngdoc', [])
         var doc = $scope.documentationItem;
         var availableDocs = docService.getAllDocuments();
         $scope.docDescription = [];
-        
+
         $scope.docDescription = doc.description ? doc.description.replace(/(<example)/g, "<ng-example").replace(/(<\/example>)/g, "</ng-example>") : '';
         $scope.directiveNameIsParam = false;
-        
+
         var dashFilter = $filter('dashCase');
         $scope.elUsage = [];
         $scope.attrUsage = [];
         $scope.classUsage = [];
-        
+
         if(doc.restrict === undefined) {
             doc.restrict = 'A'; //This is the angular default
         }
-        
+
         if(doc.requires) {
             $scope.dependencies = [];
             for(var i = 0, l = doc.requires.length; i < l; i++) {
@@ -38,7 +38,7 @@ angular.module('docular.plugin.ngdoc', [])
                 });
             }
         }
-        
+
         $scope.methods = dataFilter(availableDocs, {
             level: {op: 'gt', val: doc.level},
             type: 'method',
@@ -46,7 +46,7 @@ angular.module('docular.plugin.ngdoc', [])
             right: {op: 'lt', val: doc.right},
             left: {op: 'gt', val: doc.left}
         });
-        
+
         $scope.events = dataFilter(availableDocs, {
             level: {op: 'gt', val: doc.level},
             type: 'event',
@@ -54,7 +54,7 @@ angular.module('docular.plugin.ngdoc', [])
             right: {op: 'lt', val: doc.right},
             left: {op: 'gt', val: doc.left}
         });
-        
+
         $scope.properties = dataFilter(availableDocs, {
             level: {op: 'gt', val: doc.level},
             type: 'property',
@@ -62,7 +62,7 @@ angular.module('docular.plugin.ngdoc', [])
             right: {op: 'lt', val: doc.right},
             left: {op: 'gt', val: doc.left}
         });
-        
+
         if(doc.property) {
             $scope.properties = $scope.properties.concat(doc.property.map(function (prop) {
                 return {
@@ -72,14 +72,14 @@ angular.module('docular.plugin.ngdoc', [])
                 };
             }));
         }
-        
-        
+
+
         console.log($scope.properties);
-        
+
         $scope.elUsage.push('<' + dashFilter(doc.name));
         $scope.attrUsage.push('<' + (doc.element || 'ANY'));
         $scope.classUsage.push('<' + (doc.element || 'ANY') + ' class="');
-        
+
         var addedDirective = false;
         if(doc.params) {
             for(var i = 0, l = doc.params.length; i < l; i++) {
@@ -150,14 +150,14 @@ angular.module('docular.plugin.ngdoc', [])
         return function (content) {
             var availableDocs = docService.getAllDocuments();
             var rendered;
-            content = content.replace("<example", "<ng-example").replace("</example>", "</ng-example");
+            content = content.replace("<example", "<ng-example").replace("</example>", "</ng-example>");
             content = content.replace(/{(@link ([^}\s]+)\s+([^}]+))}/g, function (matchStr, innerMatch, linkTo, linkName) {
                 var href = linkTo;
-                
+
                 if(linkTo.indexOf('#') !== -1) {
                     linkTo = linkTo.split('#')[0];
                 }
-                
+
                 if(linkTo.indexOf('://') === -1) {
                     var result = dataFilter(availableDocs, {
                         name: linkTo
@@ -196,13 +196,20 @@ angular.module('docular.plugin.ngdoc', [])
             restrict: 'E',
             link: function ($scope, $element) {
                 var template = $scope.example, example, files = [], i = 0;
-                if(!template) { return; }
+                if (!template) {
+                    return;
+                }
+
+                if(!$scope.examples) {
+                    $scope.examples = [];
+                }
+
                 example = template.match(/(<ng-example[^>]*>[\s\S]+?(?=<\/ng-example>)<\/ng-example>)/g);
-                
+
                 var tempTemplate = markdownService(template.replace(/(<ng-example[^>]*>[\s\S]+?(?=<\/ng-example>)<\/ng-example>)/g, function () {
                     return '\n%%NGTOKEN' + (i++) + '%%\n'
                 }));
-                
+
                 i = 0;
                 template = tempTemplate.replace(/(<p>%%NGTOKEN[0-9]+%%<\/p>)/g, function () {
                     var index = i++;
@@ -210,60 +217,55 @@ angular.module('docular.plugin.ngdoc', [])
                     exampleItem = exampleItem.replace('<ng-example', '<ng-example example="examples[' + index + ']"')
                     return exampleItem;
                 });
-                
+
                 i = 0;
                 template = template.replace(/(<file[^>]*>[\s\S]+?(?=<\/file>)<\/file>)/g, function (content) {
                     files.push(content);
                     return '<div class="NGFILE" id="NGFILE' + (i++) + '"></div>'
                 });
-                
-                example = $(example ? example.join('') : '');
-                $scope.examples = [];
-                
-                $(example).each(function () {
-                    var ex = {
-                        deps: $(this).attr('deps'),
-                        group: $scope.group,
-                        module: $(this).attr('module'),
-                        files: []
-                    }
-                    
-                    $(this).find('file').each(function () {
-                        var child = $(this);
-                        var name = child.attr('name');
-                        var split = name.split('.');
 
-                        var indent = null;
-                        var content = child.html().replace(/&lt;/g, '<').replace(/&gt;/g, '>');
-                        var contentLines = content.replace(/\t/g, '    ').split(/[\n\r]/);
-                        for(var i = 0, l = contentLines.length; i < l; i++) {
-                            var line = contentLines[i];
-                            var m = line.match(/([\t\s]+)/);
-                            if(m && (indent > m[0].length || indent === null)) {
-                                indent = m[0].length;
-                            }
+                if (example) {
+                    example.forEach(function (example) {
+
+                        var exampleEl = $(example);
+                        var ex = {
+                            deps: exampleEl.attr('deps'),
+                            group: $scope.group,
+                            module: exampleEl.attr('module'),
+                            files: []
                         }
-                        var indentRegExp = new RegExp("^( {" + indent + "})", 'gm');
-                        content = content.replace(indentRegExp, '');
 
-                        ex.files.push({
-                            name: name,
-                            content: content,
-                            type: split[split.length - 1]
-                        });
+                        var files = example.match(/(<file[^>]*>[\s\S]+?(?=<\/file>)<\/file>)/g);
+
+                        for (var i = 0, l = files.length; i < l; i++) {
+                            var fileContent = files[i].match(/<file[^>]*>([\s\S]+)<\/file>/);
+
+                            var child = $(files[i]);
+                            var name = child.attr('name');
+                            var split = name.split('.');
+
+                            ex.files.push({
+                                name: name,
+                                content: fileContent[1],
+                                type: split[split.length - 1]
+                            });
+
+                        }
+
+                        $scope.examples.push(ex);
                     });
-                    $scope.examples.push(ex);
-                })
-                var compiled = $compile(template)($scope.$new());
-                compiled.each(function () {
-                    if($(this).is('.NGFILE')) {
-                        var id = $(this).attr('id');
-                        var index = parseInt(id.replace('NGFILE', ''), 10);
-                        $(this).replaceWith($(files[index]));
-                    }
-                });
-                
-                $element.append(compiled);
+
+                    var compiled = $compile(template)($scope.$new());
+                    compiled.each(function () {
+                        if ($(this).is('.NGFILE')) {
+                            var id = $(this).attr('id');
+                            var index = parseInt(id.replace('NGFILE', ''), 10);
+                            $(this).replaceWith($(files[index]));
+                        }
+                    });
+
+                    $element.append(compiled);
+                }
             }
         };
     }])
@@ -287,7 +289,7 @@ angular.module('docular.plugin.ngdoc', [])
         }
     })
     .service('exampleService', ['config', function (config) {
-        
+
         function spider(group, path, results) {
             if(group.path === path) {
                 return group;
@@ -303,20 +305,20 @@ angular.module('docular.plugin.ngdoc', [])
                 return false;
             }
         }
-        
+
         return {
             getExampleConfig: function (group) {
                 var results = [config];
                 spider(config, group.path, results);
-                
+
                 var exampleConfig = {};
-                
+
                 for(var i = 0, l = results.length; i < l; i++) {
                     if(results[i].examples) {
                         exampleConfig = $.extend(true, exampleConfig, results[i].examples);
                     }
                 }
-                
+
                 return exampleConfig;
             }
         }
@@ -365,14 +367,14 @@ angular.module('docular.plugin.ngdoc', [])
             },
             link: {
                 post: function ($scope, $element) {
-                    
+
                     var exampleConfig = exampleService.getExampleConfig($scope.group);
                     if(exampleConfig.include.angular) {
                         exampleConfig.include.js = ['resources/libraries/angular/angular.js'].concat(exampleConfig.include.js);
                     }
-                    
+
                     var deps = $scope.deps;
-                    
+
                     if(typeof deps == 'string') {
                         deps = deps.split(';');
                     }
@@ -399,17 +401,17 @@ angular.module('docular.plugin.ngdoc', [])
                         console.log("Example iframe loaded")
                         var iframeDoc = $(iframe.contents());
                         var i, l, tag, file;
-                        
+
                         for (i = 0, l = $scope.files.length; i < l; i++) {
                             file = $scope.files[i];
                             if(file.type === 'js' || file.type === 'css') {
                                 switch(file.type.toLowerCase()) {
-                                    case 'js': 
+                                    case 'js':
                                         tag = iframeDoc[0].createElement('script');
-                                    break;
-                                    case 'css': 
+                                        break;
+                                    case 'css':
                                         tag = iframeDoc[0].createElement('style');
-                                    break;
+                                        break;
                                 }
 
                                 iframeDoc[0].head.appendChild(tag);
@@ -418,7 +420,7 @@ angular.module('docular.plugin.ngdoc', [])
                                 } catch (e) { /* not my problem */ console.log(e); }
                             }
                         }
-                        
+
                         var found = false;
                         for (i = 0, l = $scope.files.length; i < l; i++) {
                             file = $scope.files[i]
@@ -426,13 +428,13 @@ angular.module('docular.plugin.ngdoc', [])
                                 if(!found) {
                                     var content = $('<div>' + file.content + '</div>');
                                     iframeDoc.find('body').append(content);
-                                    
+
                                     content.find('script').each(function () {
                                         var tag = iframeDoc[0].createElement('script');
                                         iframeDoc[0].body.appendChild(tag);
                                         tag.innerText = tag.textContent = $(this).text();
                                     });
-                                    
+
                                     found = true;
                                 } else {
                                     var script = iframeDoc[0].createElement('script');
@@ -441,7 +443,7 @@ angular.module('docular.plugin.ngdoc', [])
                                 }
                             }
                         }
-                        
+
                         if (exampleConfig.autoBootstrap) {
                             var script = iframeDoc[0].createElement('script');
                             iframeDoc[0].body.appendChild(script);
