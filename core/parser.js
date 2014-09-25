@@ -23,6 +23,9 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         //I hate regexes. Seriously. 
         var chunks = param.match(/({([^\}]+)})?\s*([\[\]\=\w\|]+)\s+([\s\S]+)/);
         
+        if(!chunks)
+            return {}
+            
         var types = chunks[2] ? chunks[2].match(/([\w]+((\.[\w<\.\(\)]+\|?[\w\(\)>]+)|\([\w]+\))?)=?/g) : null;
         if(!types) {
             paramData.type = ['undefined'];
