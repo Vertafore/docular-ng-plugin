@@ -22,7 +22,9 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         
         //I hate regexes. Seriously. 
         var chunks = param.match(/({([^\}]+)})?\s*([\[\]\=\w\|]+)\s+([\s\S]+)/);
-        
+
+        if(!chunks) { return false; }
+
         var types = chunks[2] ? chunks[2].match(/([\w]+((\.[\w<\.\(\)]+\|?[\w\(\)>]+)|\([\w]+\))?)=?/g) : null;
         if(!types) {
             paramData.type = ['undefined'];
@@ -99,8 +101,13 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             }
             
             switch(docItemKey) {
-                case 'param': 
-                    docGroup.params.push(this.parseParam(docItemContent));
+                case 'param':
+                    var param = this.parseParam(docItemContent);
+                    if(param) {
+                        docGroup.params.push(param);
+                    } else {
+                        console.error("Invalid param: " + docItemContent);
+                    }
                 break;
                 case 'property': 
                     if(!docGroup.property) {

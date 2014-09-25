@@ -25,7 +25,7 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
         generator.on('GetStyles', this.getStyles.bind(this));
         generator.on('CopyFiles', this.copyFiles.bind(this));
     },
-    
+
     createDocs: function (fileData, promises) {
         if(fileData.docType === 'ngdoc') {
             promises.push(function (currentModel) {
@@ -43,7 +43,7 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
     getStyles: function (styles) {
         styles.push(fse.readFileSync( path.resolve(__dirname, './web/ngplugin.less'), 'utf8' ));
     },
-    
+
     processConfig: function (configuration, promises) {
         var deferred = Q.defer();
         promises.push(deferred.promise);
