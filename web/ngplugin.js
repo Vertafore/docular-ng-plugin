@@ -254,18 +254,18 @@ angular.module('docular.plugin.ngdoc', [])
 
                         $scope.examples.push(ex);
                     });
-
-                    var compiled = $compile(template)($scope.$new());
-                    compiled.each(function () {
-                        if ($(this).is('.NGFILE')) {
-                            var id = $(this).attr('id');
-                            var index = parseInt(id.replace('NGFILE', ''), 10);
-                            $(this).replaceWith($(files[index]));
-                        }
-                    });
-
-                    $element.append(compiled);
                 }
+
+                var compiled = $compile(template)($scope.$new());
+                compiled.each(function () {
+                    if ($(this).is('.NGFILE')) {
+                        var id = $(this).attr('id');
+                        var index = parseInt(id.replace('NGFILE', ''), 10);
+                        $(this).replaceWith($(files[index]));
+                    }
+                });
+
+                $element.append(compiled);
             }
         };
     }])
