@@ -6,8 +6,8 @@ var DocModel = require('./core/docModel');
 var fse = require('fs-extra');
 var path = require('path');
 var request = require('request');
-var grunt = require('grunt');
 var zlib = require('zlib');
+var glob = require('glob');
 var fs = require('fs');
 
 var Plugin = function () {
@@ -77,26 +77,26 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
                                 {
                                     id: "api",
                                     title:"API's",
-                                    scripts: grunt.file.expand(['downloaded/angular/angular.js-' + version + '/src/**/*.js']),
-                                    index: grunt.file.expand(['downloaded/angular/angular.js-' + version + '/docs/content/api/index.ngdoc'])
+                                    scripts: glob.sync('downloaded/angular/angular.js-' + version + '/src/**/*.js'),
+                                    index: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/api/index.ngdoc')
                                 },
                                 {
                                     id: "guide",
                                     title: "Guide",
                                     groupIcon: 'book',
-                                    files: grunt.file.expand(['downloaded/angular/angular.js-' + version + '/docs/content/guide/**/*.ngdoc'])
+                                    files: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/guide/**/*.ngdoc')
                                 },
                                 {
                                     id: "misc",
                                     title: "Misc",
                                     groupIcon: 'empire',
-                                    files: grunt.file.expand(['downloaded/angular/angular.js-' + version + '/docs/content/misc/**/*.ngdoc'])
+                                    files: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/misc/**/*.ngdoc')
                                 },
                                 {
                                     id: "tutorial",
                                     title: "Tutorial",
                                     groupIcon: 'life-ring',
-                                    files: grunt.file.expand(['downloaded/angular/angular.js-' + version + '/docs/content/tutorial/**/*.ngdoc'])
+                                    files: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/tutorial/**/*.ngdoc')
                                 }
                             ]
                         });

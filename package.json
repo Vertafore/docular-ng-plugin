@@ -1,7 +1,7 @@
 {
   "name": "docular-ng-plugin",
   "description": "Docular plugin for generating angular-type documentation",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "homepage": "http://grunt-docular.com",
   "author": {
     "name": "Stephen Liberty",
@@ -25,7 +25,7 @@
     "node.extend": "*",
     "htmlparser2": "*",
     "fs-extra": "*",
-    "grunt": "*",
+    "glob": "*",
     "tar": "*",
     "request": "*"
   }

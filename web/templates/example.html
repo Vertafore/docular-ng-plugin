@@ -41,11 +41,6 @@ and open the template in the editor.
                     })(node);
             };
             
-            addTag('script', {src: path('resources/js/jquery.min.js')}, sync);
-            addTag('script', {src: path('resources/js/jquery.cookie.js')}, sync);
-            
-            
-            
             window.angularModule = loadData.module;
             
             for(i = 0, l = loadData.js.length; i < l; i++) {
