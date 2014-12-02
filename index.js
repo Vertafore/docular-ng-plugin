@@ -75,26 +75,26 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
                             },
                             groups: [
                                 {
-                                    id: "api",
-                                    title:"API's",
+                                    groupId: "api",
+                                    groupTitle:"API's",
                                     scripts: glob.sync('downloaded/angular/angular.js-' + version + '/src/**/*.js'),
                                     index: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/api/index.ngdoc')
                                 },
                                 {
-                                    id: "guide",
-                                    title: "Guide",
+                                    groupId: "guide",
+                                    groupTitle: "Guide",
                                     groupIcon: 'book',
                                     files: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/guide/**/*.ngdoc')
                                 },
                                 {
-                                    id: "misc",
-                                    title: "Misc",
+                                    groupId: "misc",
+                                    groupTitle: "Misc",
                                     groupIcon: 'empire',
                                     files: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/misc/**/*.ngdoc')
                                 },
                                 {
-                                    id: "tutorial",
-                                    title: "Tutorial",
+                                    groupId: "tutorial",
+                                    groupTitle: "Tutorial",
                                     groupIcon: 'life-ring',
                                     files: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/tutorial/**/*.ngdoc')
                                 }
