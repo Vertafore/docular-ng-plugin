@@ -114,7 +114,6 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
     setupConfig: function (configuration, promises) {
         configuration.angularModules.push('docular.plugin.ngdoc');
         configuration.javascript.push('resources/plugins/ngdoc/ngplugin.js');
-        configuration.css.push('resources/plugins/ngdoc/ngplugin.css');
     },
     
     copyFiles: function (webappDir) {
