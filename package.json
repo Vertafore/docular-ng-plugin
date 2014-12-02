@@ -17,6 +17,10 @@
   "engines": {
     "node": ">= 0.10.0"
   },
+  "devDependencies": {
+      "grunt-cli": "*",
+      "grunt-bump": "*"
+  },
   "dependencies": {
     "colors": "*",
     "q-fs": "*",
