@@ -77,7 +77,7 @@ Plugin.prototype = nodeExtend(Plugin.prototype, {
                                 {
                                     groupId: "api",
                                     groupTitle:"API's",
-                                    scripts: glob.sync('downloaded/angular/angular.js-' + version + '/src/**/*.js'),
+                                    files: glob.sync('downloaded/angular/angular.js-' + version + '/src/**/*.js'),
                                     index: glob.sync('downloaded/angular/angular.js-' + version + '/docs/content/api/index.ngdoc')
                                 },
                                 {
