@@ -38,6 +38,10 @@
             <div class="usageExample"><source-viewer source="classUsage" file-type="xml">{{classUsage}}</source-viewer></div>
         </div>
     </div>
+
+    <h5 ng-if="documentationItem.returns">Returns</h5>
+    <ng-example-container group='group' example="documentationItem.returns"></ng-example-container>
+
     <div ng-if="documentationItem.params.length &gt; 0" id="argumentSection">
         <h2>Arguments</h2>
         <param-list params="documentationItem.params"></param-list>
