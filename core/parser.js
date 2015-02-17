@@ -134,15 +134,13 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 break;
                 case "name":
                     if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'constant' || docGroup.ngdoc === 'provider' || docGroup.ngdoc === 'service' || docGroup.ngdoc === 'directive' || docGroup.ngdoc === 'function' || docGroup.ngdoc === 'type' || docGroup.ngdoc === 'overview') {
-                        if(docItemContent.indexOf('#') !== -1 || docItemContent.indexOf(':') !== -1) {
-                            var split = docItemContent.split(/[#:]/);
-                            parentDoc = split[0];
-                            docItemContent = split[1];
-                        } else if(!parentDoc && defaultModule) {
-                            parentDoc = defaultModule;
+						var sep = Math.max(docItemContent.indexOf(':'), docItemContent.indexOf('#'));
+						if (sep >= 0) {
+							parentDoc = docItemContent.substr(0, sep);
+							docItemContent = docItemContent.substr(sep+1);
                         }
-                    } else if(defaultModule && !parentDoc) {
-                        parentDoc = defaultModule;
+                    } else if(docGroup.ngdoc == 'module') {
+                        docGroup.module = docItemContent;
                     }
                 /*falls through*/
                 default: 
@@ -155,9 +153,9 @@ Parser.prototype = nodeExtend(Parser.prototype, {
 
         if(docGroup.name) {
             for(var i = 0, l = replaceables.length; i < l; i++) {
-                var re = new RegExp('\.(' + replaceables[i] + ')[:#][A-Za-z\d]+', 'g');
+                var re = new RegExp('\\.' + replaceables[i] + '(?=[:#])', 'g');
                 docGroup.name = docGroup.name.replace(re, '');
-                re = new RegExp('\.(' + replaceables[i] + ')$', 'g');
+                re = new RegExp('\\.' + replaceables[i] + '$', 'g');
                 docGroup.name = docGroup.name.replace(re, '');
             }
         }
@@ -165,23 +163,34 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         if(docGroup.ngdoc != 'module' && docGroup.ngdoc != 'overview') {
             if(parentDoc) {
                 for(var i = 0, l = replaceables.length; i < l; i++) {
-                    var re = new RegExp('\.(' + replaceables[i] + ')[:#][A-Za-z\d]+', 'g');
+                    var re = new RegExp('\\.' + replaceables[i] + '(?=[:#])', 'g');
                     parentDoc = parentDoc.replace(re, '');
-                    re = new RegExp('\.(' + replaceables[i] + ')$', 'g');
+                    re = new RegExp('\\.' + replaceables[i] + '$', 'g');
                     parentDoc = parentDoc.replace(re, '');
                 }
-            }
-            docGroup.parentDoc = {
-                module: docGroup.module,
-                name: parentDoc
-            };
-            if(parentDoc) {
-                docGroup.parentDoc.name = parentDoc;
-            }
+
+				var sep = parentDoc.indexOf(':');
+				if(sep >= 0)
+				{
+					docGroup.module = parentDoc.substr(0, sep);
+					parentDoc = parentDoc.substr(sep+1);
+				}
+				else
+					docGroup.module = parentDoc;
+
+				docGroup.parentDoc = {
+					module: docGroup.module,
+					name: parentDoc
+				};
+			}
         } else if (docGroup.ngdoc === 'overview' || docGroup.ngdoc === 'tutorial') {
             docGroup.parentDoc = {};
         }
-
+		
+		if(!docGroup.module && defaultModule) {
+			docGroup.module = defaultModule;
+		}
+		
         return docGroup;
     },
     
