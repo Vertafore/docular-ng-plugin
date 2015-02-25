@@ -268,7 +268,6 @@ angular.module('docular.plugin.ngdoc', [])
                 } else {
                     $element.append(template)
                 }
-                $compile($element)($scope);
             }
         };
     }])
