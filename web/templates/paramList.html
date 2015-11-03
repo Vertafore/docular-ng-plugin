@@ -12,7 +12,7 @@
                 <td>
                     <div ng-repeat="type in param.type"><span class="paramType" ng-class="type.type">{{type.name}}</span></div>
                 </td>
-                <td ng-bind-html="rendered[$index]"></td>
+                <td bind-html-compile="rendered[$index]"></td>
             </tr>
         </tbody>
     </table>
