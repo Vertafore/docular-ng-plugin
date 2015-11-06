@@ -146,6 +146,22 @@ angular.module('docular.plugin.ngdoc', [])
             }
         }
     }])
+    .directive('returnsContent', ['ngmarkdown', '$sce', function (markdownService, $sce) {
+        return {
+            restrict: 'E',
+            scope: {
+                returns: '='
+            },
+            templateUrl: 'resources/plugins/ngdoc/templates/returnsContent.html',
+            link: {
+                post: function ($scope) {
+                    var marked = markdownService($scope.returns.content),
+                        trusted = $sce.trustAsHtml(marked);
+                    $scope.rendered = trusted;
+                }
+            }
+        }
+    }])
     .service('ngmarkdown', ['markdown', 'documentation', 'dataFilter', function (markdownService, docService, dataFilter) {
         return function (content) {
             var availableDocs = docService.getAllDocuments();
@@ -393,12 +409,12 @@ angular.module('docular.plugin.ngdoc', [])
                     }
                     var iframe = $("<iframe>");
                     iframe.attr('src', 'resources/plugins/ngdoc/templates/example.html?' + JSON.stringify({
-                        js: exampleConfig.include.js,
-                        css: exampleConfig.include.css,
-                        baseUrl: config.baseUrl,
-                        autoBootstrap: exampleConfig.autoBootstrap,
-                        module: $scope.module
-                    }));
+                            js: exampleConfig.include.js,
+                            css: exampleConfig.include.css,
+                            baseUrl: config.baseUrl,
+                            autoBootstrap: exampleConfig.autoBootstrap,
+                            module: $scope.module
+                        }));
                     iframe.appendTo($element);
 
                     iframe.load(function () {

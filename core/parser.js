@@ -9,6 +9,34 @@ var eid = 1;
 var Parser = function () {};
 
 Parser.prototype = nodeExtend(Parser.prototype, {
+    // Parse return values for formatting
+    parseReturns: function(returns) {
+        var returnsData = {
+            type: [],
+            content: null
+        };
+
+        var chunks = returns.match(/({([^\}]+)})?\s*([\s\S]+)/);
+        if(!chunks) {
+            return false;
+        }
+        var types = chunks[2] ? chunks[2].match(/([\w]+((\.[\w<\.\(\)]+\|?[\w\(\)>]+)|\([\w]+\))?)=?/g) : null;
+        if(types) {
+            returnsData.type = types.map(function (type) {
+                if(type.indexOf('=') !== -1) { returnsData.optional = true; }
+                type = type.replace(/=.*/, '');
+                return {
+                    name: type,
+                    type: (type.indexOf('function') !== -1 ? 'function' : type).toLowerCase()
+                };
+            })
+        }
+        if(chunks.length >= 4) {
+            returnsData.content = chunks[3];
+        }
+
+        return returnsData;
+    },
 
     parseParam: function (param) {
         var paramData = {
@@ -19,7 +47,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             optional: false,
             defaultValue: null
         };
-        
+
         //I hate regexes. Seriously. 
         var chunks = param.match(/({([^\}]+)})?\s*([\[\]\=\w\|]+)\s+([\s\S]+)/);
 
@@ -38,7 +66,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 };
             })
         }
-        
+
         paramData.varName = chunks[3].replace('[', '').replace(']', '');
         if(paramData.varName.indexOf('|') !== -1) {
             var names = paramData.varName.split('|');
@@ -50,19 +78,19 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             defaultValue = defaultValue[1];
             paramData.varName = paramData.varName.replace('=' + defaultValue, '');
         }
-        
+
         paramData.defaultValue = defaultValue;
         paramData.description = chunks[4];
-        
+
         return paramData;
     },
-    
+
     parseDocumentationChunk: function (docChunk, isngdoc, defaultModule) {
         var docItems, docItem, ngdocParamFound = false, docGroup = {
             params: [],
             docType: 'ngdoc'
         }, i, l, docItemContent, docItemKey;
-        
+
         if(!isngdoc) {
             docItems = docChunk.match(/\*\s*@(?:(?!\s*\*\s*@)[\s\S])+/gm);
         } else {
@@ -77,7 +105,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 ngdocParamFound = true;
             }
         }
-        
+
         //Exit if not angular doc - helps prevent errors
         if(!ngdocParamFound) { return false; }
         var parentDoc, parentName;
@@ -87,11 +115,11 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 docItem = docItem.replace('@description', '@description ');
             }
             var matches = docItem.match(/@([\w\d]+)\s*([\s\S]+)?/);
-            
+
             if(!matches) {
                 return false;
             }
-            
+
             docItemKey = matches[1];
             docItemContent = matches[2] || '';
             docItemContent = docItemContent.replace(/[\n\r\s]+$/, '')
@@ -99,7 +127,7 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                 docItemContent = docChunk.match(/@description([\s\S]+)/);
                 docItemContent = docItemContent[1];
             }
-            
+
             switch(docItemKey) {
                 case 'param':
                     var param = this.parseParam(docItemContent);
@@ -108,47 +136,53 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     } else {
                         console.error("Invalid param: " + docItemContent);
                     }
-                break;
-                case 'property': 
+                    break;
+                case "returns":
+                    var returns = this.parseReturns(docItemContent);
+                    docGroup[docItemKey] = returns || '';
+                    break;
+                    break;
+                case 'property':
                     if(!docGroup.property) {
                         docGroup.property = [];
                     }
                     docGroup.property.push(this.parseParam(docItemContent))
-                break;
+                    break;
                 case 'deprecated':
                 case 'scope':
                     docGroup[docItemKey] = true;
-                break;
+                    break;
                 case 'requires':
                     if(!docGroup.requires) {
                         docGroup.requires = [];
                     }
                     docGroup.requires.push(docItemContent);
-                break;
+                    break;
                 case 'methodOf':
                 case 'propertyOf':
                 case 'eventOf':
                 case 'memberOf': //Non standard, but needed for organization
                     docGroup[docItemKey] = docItemContent;
                     parentDoc = docItemContent;
-                break;
+                    break;
                 case "name":
                     if(docGroup.ngdoc === 'method' || docGroup.ngdoc === 'property' || docGroup.ngdoc === 'event' || docGroup.ngdoc === 'constant' || docGroup.ngdoc === 'provider' || docGroup.ngdoc === 'service' || docGroup.ngdoc === 'directive' || docGroup.ngdoc === 'function' || docGroup.ngdoc === 'type' || docGroup.ngdoc === 'overview') {
-						var sep = Math.max(docItemContent.indexOf(':'), docItemContent.indexOf('#'));
-						if (sep >= 0) {
-							parentDoc = docItemContent.substr(0, sep);
-							docItemContent = docItemContent.substr(sep+1);
+                        var sep = Math.max(docItemContent.indexOf(':'), docItemContent.indexOf('#'));
+                        if (sep >= 0) {
+                            parentDoc = docItemContent.substr(0, sep);
+                            docItemContent = docItemContent.substr(sep+1);
                         }
                     } else if(docGroup.ngdoc == 'module') {
                         docGroup.module = docItemContent;
                     }
                 /*falls through*/
-                default: 
+
+                default:
                     docGroup[docItemKey] = docItemContent;
                     break;
             }
         }
-        
+
         var replaceables = ['method', 'property', 'event', 'constant', 'provider', 'service', 'function', 'type', 'directive'];
 
         if(docGroup.name) {
@@ -169,33 +203,33 @@ Parser.prototype = nodeExtend(Parser.prototype, {
                     parentDoc = parentDoc.replace(re, '');
                 }
 
-				var sep = parentDoc.indexOf(':');
-				if(sep >= 0)
-				{
-					docGroup.module = parentDoc.substr(0, sep);
-					parentDoc = parentDoc.substr(sep+1);
-				}
-				else
-					docGroup.module = parentDoc;
+                var sep = parentDoc.indexOf(':');
+                if(sep >= 0)
+                {
+                    docGroup.module = parentDoc.substr(0, sep);
+                    parentDoc = parentDoc.substr(sep+1);
+                }
+                else
+                    docGroup.module = parentDoc;
 
-				docGroup.parentDoc = {
-					module: docGroup.module,
-					name: parentDoc
-				};
-			}
+                docGroup.parentDoc = {
+                    module: docGroup.module,
+                    name: parentDoc
+                };
+            }
         } else if (docGroup.ngdoc === 'overview' || docGroup.ngdoc === 'tutorial') {
             docGroup.parentDoc = {};
         }
-		
-		if(!docGroup.module && defaultModule) {
-			docGroup.module = defaultModule;
-		}
-		
+
+        if(!docGroup.module && defaultModule) {
+            docGroup.module = defaultModule;
+        }
+
         return docGroup;
     },
-    
+
     parse: function (fileData, allFiles) {
-        
+
         var content = fileData.content, documentationChunks, isngdoc = false;
         if(fileData.extension === 'ngdoc') {
             documentationChunks = [content];
@@ -203,22 +237,22 @@ Parser.prototype = nodeExtend(Parser.prototype, {
         } else {
             documentationChunks = content.match(/\/\*{2,}(?:(?!\*{1,}\/)[\s\S])+/gm);
         }
-        
+
         if(!documentationChunks) {
             return false;
         }
-        
+
         var results = [], defaultModule = null;
         for(var i = 0, l = documentationChunks.length; i < l; i++) {
             var result = this.parseDocumentationChunk(documentationChunks[i], isngdoc, defaultModule);
             if(result) {
                 result.file = fileData.fileName;
-                results.push(result); 
+                results.push(result);
             }
         }
         return results;
     },
-    
+
     backfill: function (fileData, allFiles) {
         for(var i = 0, l = fileData.docs.length; i < l; i++) {
             var doc = fileData.docs[i];
@@ -235,16 +269,16 @@ Parser.prototype = nodeExtend(Parser.prototype, {
             }
         }
     },
-    
+
     guessModuleFromFiles: function (docModel, allFiles) {
         var currentFile = docModel.file;
         var fileMatcher = '[^\\/\\\\]+$';
         var currentFolder = currentFile.replace(new RegExp(fileMatcher), '');
-        
+
         var module = this._findModuleDeclaration(currentFolder, allFiles);
         return module;
     },
-    
+
     _findModuleDeclaration: function (inFolder, allFiles) {
         var fileMatcher = '[^\\/\\\\]+$';
         var regex = new RegExp('^' + inFolder + fileMatcher);
