@@ -146,6 +146,22 @@ angular.module('docular.plugin.ngdoc', [])
             }
         }
     }])
+    .directive('returnsContent', ['ngmarkdown', '$sce', function (markdownService, $sce) {
+        return {
+            restrict: 'E',
+            scope: {
+                returns: '='
+            },
+            templateUrl: 'resources/plugins/ngdoc/templates/returnsContent.html',
+            link: {
+                post: function ($scope) {
+                    var marked = markdownService($scope.returns.content),
+                        trusted = $sce.trustAsHtml(marked);
+                    $scope.rendered = trusted;
+                }
+            }
+        }
+    }])
     .service('ngmarkdown', ['markdown', 'documentation', 'dataFilter', function (markdownService, docService, dataFilter) {
         return function (content) {
             var availableDocs = docService.getAllDocuments();
@@ -195,7 +211,11 @@ angular.module('docular.plugin.ngdoc', [])
             },
             restrict: 'E',
             link: function ($scope, $element) {
-                var template = $scope.example, example, files = [], i = 0;
+                var template = $scope.example,
+                    compiled,
+                    example,
+                    files = [],
+                    i = 0;
                 if (!template) {
                     return;
                 }
@@ -224,6 +244,7 @@ angular.module('docular.plugin.ngdoc', [])
                     return '<div class="NGFILE" id="NGFILE' + (i++) + '"></div>'
                 });
 
+                compiled = $compile(template)($scope.$new());
                 if (example) {
                     example.forEach(function (example) {
 
@@ -233,7 +254,7 @@ angular.module('docular.plugin.ngdoc', [])
                             group: $scope.group,
                             module: exampleEl.attr('module'),
                             files: []
-                        }
+                        };
 
                         var files = example.match(/(<file[^>]*>[\s\S]+?(?=<\/file>)<\/file>)/g);
 
@@ -255,7 +276,6 @@ angular.module('docular.plugin.ngdoc', [])
                         $scope.examples.push(ex);
                     });
 
-                    var compiled = $compile(template)($scope.$new());
                     compiled.each(function () {
                         if ($(this).is('.NGFILE')) {
                             var id = $(this).attr('id');
@@ -264,10 +284,8 @@ angular.module('docular.plugin.ngdoc', [])
                         }
                     });
 
-                    $element.append(compiled);
-                } else {
-                    $element.append(template)
                 }
+                $element.append(compiled);
             }
         };
     }])
@@ -391,12 +409,12 @@ angular.module('docular.plugin.ngdoc', [])
                     }
                     var iframe = $("<iframe>");
                     iframe.attr('src', 'resources/plugins/ngdoc/templates/example.html?' + JSON.stringify({
-                        js: exampleConfig.include.js,
-                        css: exampleConfig.include.css,
-                        baseUrl: config.baseUrl,
-                        autoBootstrap: exampleConfig.autoBootstrap,
-                        module: $scope.module
-                    }));
+                            js: exampleConfig.include.js,
+                            css: exampleConfig.include.css,
+                            baseUrl: config.baseUrl,
+                            autoBootstrap: exampleConfig.autoBootstrap,
+                            module: $scope.module
+                        }));
                     iframe.appendTo($element);
 
                     iframe.load(function () {
@@ -466,6 +484,19 @@ angular.module('docular.plugin.ngdoc', [])
                         });
                     });
                 }
+            }
+        }
+    }])
+    .directive('bindHtmlCompile', ['$compile', function($compile) {
+        return {
+            restrict: 'A',
+            scope: {
+                bindHtmlCompile: '='
+            },
+            link: function(scope, element, attrs) {
+                var template = scope.bindHtmlCompile && scope.bindHtmlCompile.toString();
+                element.html(template);
+                $compile(element.contents())(scope);
             }
         }
     }]);
